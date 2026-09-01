@@ -9,8 +9,8 @@ Guia simples para todo mundo do time saber usar o Git/GitHub no dia a dia.
 Isso só precisa ser feito uma vez:
 
 ```bash
-git clone https://github.com/usuario/nome-do-repositorio.git
-cd nome-do-repositorio
+git clone https://github.com/WsdxrYann/Projeto-fincancas.git
+cd Projeto-fincancas
 ```
 
 ## 2. Criar sua branch
