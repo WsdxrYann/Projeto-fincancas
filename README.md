@@ -77,4 +77,3 @@ git pull origin main
 
 ---
 
-Dúvidas, chama [seu nome].
