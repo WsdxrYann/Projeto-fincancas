@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poupee — Controle Financeiro</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23F2600C'/%3E%3Cpath d='M4 8h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M4 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
+</head>
+<body data-view="landing">
+
+<!-- SPRITE DE ÍCONES REUTILIZADOS (evita duplicar o mesmo SVG várias vezes no HTML) -->
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;">
+  <symbol id="icon-brand" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h.01"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+  </symbol>
+  <symbol id="icon-theme" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+  </symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 13l4 4L19 7"/>
+  </symbol>
+</svg>
+
+<!-- LANDING PAGE -->
+<section class="landing-screen" id="landing">
+
+  <header class="landing-nav">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24"><use href="#icon-brand"></use></svg></div>
+      <span class="brand-name">Poupee</span>
+    </div>
+    <div class="landing-nav-actions">
+      <button class="theme-toggle" aria-label="Alternar tema">
+        <svg viewBox="0 0 24 24"><use href="#icon-theme"></use></svg>
+      </button>
+      <button class="link-btn-nav js-goto-login" type="button">Entrar</button>
+      <button class="btn btn-primary js-goto-signup" type="button">Começar grátis</button>
+    </div>
+  </header>
+
+  <section class="landing-hero">
+    <div class="landing-hero-text">
+      <h1>Saiba exatamente para onde seu dinheiro está indo</h1>
+      <p class="landing-sub">Controle despesas e receitas em um só lugar. Simples, rápido e feito pro dia a dia.</p>
+      <div class="landing-hero-actions">
+        <button class="btn btn-primary btn-lg js-goto-signup" type="button">Criar conta em 1 minuto</button>
+        <button class="btn btn-ghost btn-lg js-goto-login" type="button">Já tenho conta</button>
+      </div>
+    </div>
+
+    <div class="landing-hero-visual" aria-hidden="true">
+      <div class="hero-card landing-mock-card">
+        <div>
+          <p class="label">Saldo do mês</p>
+          <p class="num">R$ 3.240,50</p>
+          <span class="delta">
+            <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="m6 15 6-6 6 6"/></svg>
+            12% a mais que julho
+          </span>
+        </div>
+        <div class="hero-mini-charts">
+          <span style="height:30%"></span><span style="height:45%"></span><span style="height:38%" class="on"></span>
+          <span style="height:60%"></span><span style="height:52%" class="on"></span><span style="height:70%"></span>
+          <span style="height:48%" class="on"></span>
+        </div>
+      </div>
+      <div class="panel landing-mock-panel">
+        <h3>Gastos por categoria</h3>
+        <div class="cat-bar-row"><span class="cat-dot" style="background:#F2600C"></span><span class="name">Moradia</span><div class="cat-track"><div class="cat-fill" style="width:78%;background:#F2600C"></div></div><span class="val">R$ 1.100</span></div>
+        <div class="cat-bar-row"><span class="cat-dot" style="background:#2F7DBF"></span><span class="name">Alimentação</span><div class="cat-track"><div class="cat-fill" style="width:52%;background:#2F7DBF"></div></div><span class="val">R$ 730</span></div>
+        <div class="cat-bar-row"><span class="cat-dot" style="background:#8A5CD6"></span><span class="name">Transporte</span><div class="cat-track"><div class="cat-fill" style="width:38%;background:#8A5CD6"></div></div><span class="val">R$ 410</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section tinted" id="problema">
+    <div class="landing-section-inner narrow">
+      <h2>Você sabe pra onde foi seu dinheiro esse mês?</h2>
+      <ul class="problem-list">
+        <li>Você gasta ao longo do mês e, na hora de fechar as contas, não lembra onde foi parte do dinheiro.</li>
+        <li>As contas se acumulam e é fácil esquecer o que já venceu — ou o que já foi pago.</li>
+        <li>Planilha ninguém atualiza. App complicado ninguém usa.</li>
+        <li>No fim, você sabe que sobrou pouco, mas não sabe exatamente por quê.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="landing-section" id="solucao">
+    <div class="landing-section-inner solution-grid">
+      <div class="solution-intro">
+        <h2>Um lugar só pra organizar tudo isso</h2>
+        <p>O Poupee junta despesas, receitas e categorias num dashboard simples — sem aba escondida, sem fórmula, sem enrolação.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><use href="#icon-check"></use></svg>Saldo, receitas e despesas do mês em um único painel</li>
+        <li><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><use href="#icon-check"></use></svg>Lançamento rápido de despesa ou receita</li>
+        <li><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><use href="#icon-check"></use></svg>Categorias coloridas pra ver onde o dinheiro está indo</li>
+        <li><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><use href="#icon-check"></use></svg>Filtros de "A pagar" e "Pagas" pra nunca perder um vencimento</li>
+        <li><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><use href="#icon-check"></use></svg>Tema claro e escuro, do jeito que você preferir usar</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="landing-section tinted" id="beneficios">
+    <div class="landing-section-inner">
+      <h2>Por que usar o Poupee</h2>
+      <div class="benefit-list">
+        <div class="benefit-item">
+          <p class="benefit-title">Visão geral num só olhar</p>
+          <p>Veja o saldo do mês, quanto entrou e quanto saiu, sem abrir três telas diferentes.</p>
+        </div>
+        <div class="benefit-item">
+          <p class="benefit-title">Categorias que fazem sentido</p>
+          <p>Moradia, alimentação, transporte, lazer, saúde... entenda de verdade onde está gastando mais.</p>
+        </div>
+        <div class="benefit-item">
+          <p class="benefit-title">Lançamento em menos de 10 segundos</p>
+          <p>Registre uma despesa ou receita rapidinho, sem formulário complicado.</p>
+        </div>
+        <div class="benefit-item">
+          <p class="benefit-title">Pendente ou pago, sempre claro</p>
+          <p>Filtre o que ainda precisa pagar do que já está quitado, sem precisar adivinhar.</p>
+        </div>
+        <div class="benefit-item">
+          <p class="benefit-title">Interface limpa, sem planilha</p>
+          <p>Nada de menus escondidos ou células perdidas. Só o que importa, na tela.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section" id="como-funciona">
+    <div class="landing-section-inner">
+      <h2>Como funciona</h2>
+      <div class="steps-row">
+        <div class="step">
+          <span class="step-num">1</span>
+          <p class="step-title">Crie sua conta</p>
+          <p>Leva menos de um minuto, sem burocracia.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <p class="step-title">Cadastre despesas e receitas</p>
+          <p>Registre o que entra e o que sai, no seu ritmo.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <p class="step-title">Acompanhe o dashboard</p>
+          <p>Veja pra onde seu dinheiro está indo, sempre que quiser.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section tinted" id="prints">
+    <div class="landing-section-inner">
+      <h2>Veja como fica na prática</h2>
+      <div class="prints-grid">
+
+        <figure class="print-card">
+          <div class="print-preview mini-dash" aria-hidden="true">
+            <div class="mini-hero"><span>Saldo do mês</span><strong>R$ 3.240,50</strong></div>
+            <div class="mini-stats"><span></span><span></span><span></span></div>
+            <div class="mini-bars"><i style="width:80%;background:#F2600C"></i><i style="width:55%;background:#2F7DBF"></i><i style="width:35%;background:#8A5CD6"></i></div>
+          </div>
+          <figcaption>Dashboard</figcaption>
+        </figure>
+
+        <figure class="print-card">
+          <div class="print-preview mini-list" aria-hidden="true">
+            <div class="mini-row"><i></i><span></span><b class="pending">A pagar</b></div>
+            <div class="mini-row"><i></i><span></span><b class="paid">Paga</b></div>
+            <div class="mini-row"><i></i><span></span><b class="pending">A pagar</b></div>
+          </div>
+          <figcaption>Despesas</figcaption>
+        </figure>
+
+        <figure class="print-card">
+          <div class="print-preview mini-form" aria-hidden="true">
+            <div class="mini-seg"><span class="on">Despesa</span><span>Receita</span></div>
+            <div class="mini-field"></div>
+            <div class="mini-chips"><i style="background:#F2600C"></i><i style="background:#2F7DBF"></i><i style="background:#8A5CD6"></i></div>
+          </div>
+          <figcaption>Novo lançamento</figcaption>
+        </figure>
+
+        <figure class="print-card">
+          <div class="print-preview mini-cat" aria-hidden="true">
+            <div><i style="background:#F2600C"></i></div>
+            <div><i style="background:#2F7DBF"></i></div>
+            <div><i style="background:#8A5CD6"></i></div>
+            <div><i style="background:#D6497D"></i></div>
+          </div>
+          <figcaption>Categorias</figcaption>
+        </figure>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-trust">
+    <p>Feito para quem quer simplicidade de verdade.</p>
+  </section>
+
+  <section class="landing-cta">
+    <div class="landing-cta-inner">
+      <h2>Pronto para ter o controle do seu dinheiro?</h2>
+      <button class="btn btn-lg js-goto-signup" type="button">Começar agora — é grátis</button>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <span>© 2026 Poupee</span>
+    <button class="link-btn-nav js-goto-login" type="button">Entrar</button>
+  </footer>
+
+</section>
+
+<!-- LOGIN -->
+<section class="login-screen" id="login">
+  <div class="login-topbar">
+    <button class="theme-toggle" aria-label="Alternar tema">
+      <svg viewBox="0 0 24 24"><use href="#icon-theme"></use></svg>
+    </button>
+  </div>
+  <div class="login-card">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24"><use href="#icon-brand"></use></svg>
+    </div>
+    <h1>Entrar no Poupee</h1>
+    <p class="sub">Controle suas despesas e receitas em um só lugar</p>
+
+    <div class="field">
+      <label for="loginEmail">E-mail</label>
+      <input class="input" id="loginEmail" type="email" placeholder="voce@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="loginSenha">Senha</label>
+      <input class="input" id="loginSenha" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn btn-primary" id="loginBtn" type="button" style="width:100%;justify-content:center;">Entrar</button>
+    <button class="link-btn" id="forgotBtn" type="button">Esqueci minha senha</button>
+    <p class="signup-hint">Ainda não tem conta? <a href="#" id="goSignup" class="js-goto-signup">Criar conta</a></p>
+  </div>
+</section>
+
+<!-- CRIAR CONTA -->
+<section class="login-screen" id="signup">
+  <div class="login-topbar">
+    <button class="theme-toggle" aria-label="Alternar tema">
+      <svg viewBox="0 0 24 24"><use href="#icon-theme"></use></svg>
+    </button>
+  </div>
+  <div class="login-card">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24"><use href="#icon-brand"></use></svg>
+    </div>
+    <h1>Criar conta no Poupee</h1>
+    <p class="sub">Leva menos de um minuto pra começar</p>
+
+    <div class="field">
+      <label for="signupNome">Nome completo</label>
+      <input class="input" id="signupNome" type="text" placeholder="Seu nome" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="signupEmail">E-mail</label>
+      <input class="input" id="signupEmail" type="email" placeholder="voce@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="signupSenha">Senha</label>
+      <input class="input" id="signupSenha" type="password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="signupSenha2">Confirmar senha</label>
+      <input class="input" id="signupSenha2" type="password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+
+    <button class="btn btn-primary" id="signupBtn" type="button" style="width:100%;justify-content:center;">Criar conta</button>
+    <p class="signup-hint">Já tem conta? <a href="#" id="goLogin" class="js-goto-login">Entrar</a></p>
+  </div>
+</section>
+
+<!-- BARRA MOBILE + OVERLAY DO MENU -->
+<div class="mobile-bar">
+  <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu">
+    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <span class="brand-name">Poupee</span>
+</div>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24"><use href="#icon-brand"></use></svg>
+      </div>
+      <h1 class="brand-name">Poupee</h1>
+    </div>
+
+    <nav class="nav" id="navPrincipal">
+      <button class="nav-item active" data-screen="dashboard" data-tour="dashboard">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Visão geral
+      </button>
+      <button class="nav-item" data-screen="despesas">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"/><path d="M2 10h20"/></svg>
+        Despesas
+      </button>
+      <button class="nav-item" data-screen="receitas">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+        Receitas
+      </button>
+      <button class="nav-item" data-screen="categorias" data-tour="categorias">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Categorias
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">TV</div>
+      <div class="who">
+        <span>Thiago Veronez</span>
+        <span>conta pessoal</span>
+      </div>
+      <button class="logout-btn" id="logoutBtn" aria-label="Sair" title="Sair">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- DASHBOARD -->
+    <section class="screen active" id="dashboard">
+      <div class="topbar">
+        <div>
+          <h2>Visão geral</h2>
+          <p class="sub" id="dashboardPeriodoLabel">Todos os períodos</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="periodo-filtro" data-tour="periodo">
+            <select class="input select-periodo" id="filtroMes" aria-label="Filtrar por mês"></select>
+            <select class="input select-periodo" id="filtroAno" aria-label="Filtrar por ano"></select>
+          </div>
+          <button class="theme-toggle" aria-label="Alternar tema">
+            <svg viewBox="0 0 24 24"><use href="#icon-theme"></use></svg>
+          </button>
+          <button class="btn btn-primary" data-screen-link="nova" data-tour="novo-lancamento">
+            <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Novo lançamento
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div>
+          <p class="label">Saldo do período</p>
+          <p class="num" id="saldoPeriodo">R$ 0,00</p>
+          <span class="delta" id="saldoPrevisto">
+            <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M12 7v5l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+            Saldo previsto: R$ 0,00
+          </span>
+        </div>
+        <div class="hero-chart-wrap">
+          <canvas id="chartEvolucaoSaldo" height="70"></canvas>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="top">
+            <div>
+              <p class="stat-label">Receitas</p>
+              <p class="stat-num" id="statReceitas">R$ 0,00</p>
+            </div>
+            <div class="icon-wrap green">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="top">
+            <div>
+              <p class="stat-label">Despesas</p>
+              <p class="stat-num" id="statDespesas">R$ 0,00</p>
+            </div>
+            <div class="icon-wrap red">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="m5 12 7 7 7-7"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="top">
+            <div>
+              <p class="stat-label">Contas pendentes</p>
+              <p class="stat-num" id="statPendentesCount">0</p>
+              <p class="stat-sub" id="statPendentesValor">R$ 0,00</p>
+            </div>
+            <div class="icon-wrap orange">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-row" data-tour="graficos">
+        <div class="panel">
+          <h3>Gastos por categoria</h3>
+          <div class="chart-canvas-wrap"><canvas id="chartCategorias"></canvas></div>
+          <p class="chart-empty" id="chartCategoriasVazio" hidden>Nenhuma despesa no período selecionado.</p>
+        </div>
+
+        <div class="panel">
+          <h3>Lançamentos recentes</h3>
+          <div class="tx-list" id="txListRecentes"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESPESAS -->
+    <section class="screen" id="despesas">
+      <div class="topbar">
+        <div>
+          <h2>Despesas</h2>
+          <p class="sub">Tudo que você precisa pagar, em um lugar só</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" id="btnExportCsvDespesas" type="button">Exportar CSV</button>
+          <button class="btn btn-ghost" id="btnExportPdfDespesas" type="button">Exportar PDF</button>
+          <button class="btn btn-primary" data-screen-link="nova" data-novo-tipo="despesa">
+            <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Nova despesa
+          </button>
+        </div>
+      </div>
+
+      <div class="list-toolbar">
+        <input class="input busca-input" id="buscaDespesas" type="search" placeholder="Buscar despesa por nome...">
+        <div class="periodo-filtro">
+          <select class="input select-periodo espelho-mes" aria-label="Filtrar por mês"></select>
+          <select class="input select-periodo espelho-ano" aria-label="Filtrar por ano"></select>
+        </div>
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="todas" aria-pressed="true">Todas</button>
+        <button class="filter-tab" data-filter="pagar" aria-pressed="false">A pagar</button>
+        <button class="filter-tab" data-filter="pagas" aria-pressed="false">Pagas</button>
+      </div>
+
+      <p class="list-total">Total filtrado: <strong id="totalDespesas">R$ 0,00</strong></p>
+
+      <div class="list-card">
+        <div class="list-row head">
+          <span></span><span>Descrição</span><span>Vencimento</span><span>Valor</span><span>Status</span><span></span>
+        </div>
+        <div class="list-rows" id="listaDespesas"></div>
+        <p class="list-empty" id="despesasVazio" hidden>Nenhuma despesa encontrada.</p>
+      </div>
+    </section>
+
+    <!-- RECEITAS -->
+    <section class="screen" id="receitas">
+      <div class="topbar">
+        <div>
+          <h2>Receitas</h2>
+          <p class="sub">O que entrou no seu caixa</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" id="btnExportCsvReceitas" type="button">Exportar CSV</button>
+          <button class="btn btn-ghost" id="btnExportPdfReceitas" type="button">Exportar PDF</button>
+          <button class="btn btn-primary" data-screen-link="nova" data-novo-tipo="receita">
+            <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Nova receita
+          </button>
+        </div>
+      </div>
+
+      <div class="list-toolbar">
+        <input class="input busca-input" id="buscaReceitas" type="search" placeholder="Buscar receita por nome...">
+        <div class="periodo-filtro">
+          <select class="input select-periodo espelho-mes" aria-label="Filtrar por mês"></select>
+          <select class="input select-periodo espelho-ano" aria-label="Filtrar por ano"></select>
+        </div>
+      </div>
+
+      <p class="list-total">Total filtrado: <strong id="totalReceitas">R$ 0,00</strong></p>
+
+      <div class="list-card">
+        <div class="list-row head">
+          <span></span><span>Descrição</span><span>Recebido em</span><span>Valor</span><span>Categoria</span><span></span>
+        </div>
+        <div class="list-rows" id="listaReceitas"></div>
+        <p class="list-empty" id="receitasVazio" hidden>Nenhuma receita encontrada.</p>
+      </div>
+    </section>
+
+    <!-- CATEGORIAS -->
+    <section class="screen" id="categorias">
+      <div class="topbar">
+        <div>
+          <h2>Categorias</h2>
+          <p class="sub">Toda despesa ou receita precisa estar em uma delas · arraste pra reordenar</p>
+        </div>
+      </div>
+
+      <div class="cat-grid" id="catGrid"></div>
+
+      <!-- Cartão de edição de categoria (nome + cor), some por padrão -->
+      <div class="form-card cat-edit-card" id="catEditCard" hidden>
+        <div class="field">
+          <label>Usada em</label>
+          <div class="segmented" id="catEditTipoSegmented">
+            <button class="active" type="button" data-cat-tipo="despesa" aria-pressed="true">Despesas</button>
+            <button type="button" data-cat-tipo="receita" aria-pressed="false">Receitas</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="catEditNome">Nome da categoria</label>
+          <input class="input" id="catEditNome" type="text" placeholder="Ex.: Assinaturas">
+        </div>
+        <div class="field">
+          <label for="catEditCor">Cor</label>
+          <input class="input cat-color-input" id="catEditCor" type="color" value="#F2600C">
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost" type="button" id="catEditCancelar">Cancelar</button>
+          <button class="btn btn-primary" type="button" id="catEditSalvar">Salvar categoria</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOVO LANÇAMENTO -->
+    <section class="screen" id="nova">
+      <div class="topbar">
+        <div>
+          <h2 id="novaTitulo">Novo lançamento</h2>
+          <p class="sub">Cadastre uma despesa ou receita</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="field">
+          <label>Tipo</label>
+          <div class="segmented" id="tipoSegmented">
+            <button class="active" type="button" data-type="despesa" aria-pressed="true">Despesa</button>
+            <button type="button" data-type="receita" aria-pressed="false">Receita</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="descricao">Descrição</label>
+          <input class="input" id="descricao" type="text" placeholder="Ex.: Conta de luz">
+        </div>
+
+        <div class="field">
+          <label for="valor">Valor</label>
+          <div class="value-input">
+            <span>R$</span>
+            <input class="input" id="valor" type="text" inputmode="decimal" placeholder="0,00">
+          </div>
+          <p class="hint">Só aceita valores positivos, maiores que zero.</p>
+        </div>
+
+        <div class="field" id="campoData">
+          <label for="vencimento" id="labelData">Data de vencimento</label>
+          <input class="input" id="vencimento" type="date">
+        </div>
+
+        <div class="field">
+          <label>Categoria</label>
+          <div class="cat-picker" id="catPicker"></div>
+        </div>
+
+        <div class="field" id="campoStatus">
+          <label>Status</label>
+          <div class="segmented" id="statusSegmented">
+            <button class="active" type="button" data-status-opt="pagar" aria-pressed="true">A pagar</button>
+            <button type="button" data-status-opt="paga" aria-pressed="false">Já paga</button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" type="button" id="btnCancelarLancamento">Cancelar</button>
+          <button class="btn btn-primary" type="button" id="btnSalvarLancamento">Salvar lançamento</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Atalho flutuante (FAB) — só aparece em telas mobile -->
+<button class="fab" id="fabNovo" type="button" aria-label="Novo lançamento">
+  <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- Container de notificações (toasts) -->
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
