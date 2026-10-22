@@ -3,9 +3,11 @@
 -- Rodar depois do schema.sql
 -- =====================================================================
 USE poupee;
+SET NAMES utf8mb4; -- garante acentos e emojis certos ao rodar pelo terminal
 
+-- Login de exemplo: thiago@exemplo.com / 123456 (hash bcrypt gerado pela API)
 INSERT INTO usuarios (nome, email, senha_hash) VALUES
-  ('Thiago Veronez', 'thiago@exemplo.com', '$2y$10$exemplo.de.hash.substituir.no.backend');
+  ('Thiago Veronez', 'thiago@exemplo.com', '$2b$10$9H8UegKKMcPtSrydJGXE7egcX9YnpIl2vdxpCAydhHuqDWYwWFat.');
 
 SET @usuario_id = LAST_INSERT_ID();
 
