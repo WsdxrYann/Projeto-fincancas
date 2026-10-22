@@ -1,0 +1,20 @@
+{
+  "name": "poupee-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API do Poupee: lançamentos, categorias e balanço financeiro",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev:memoria": "node src/server.js --memoria",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^4.22.3",
+    "mysql2": "^3.24.6"
+  }
+}
