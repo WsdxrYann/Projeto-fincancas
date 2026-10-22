@@ -255,8 +255,10 @@ function renderDashboard(){
   const totalDespesas = despesasPeriodo.reduce((s,t) => s + t.valor, 0);
   const pendentes = despesasPeriodo.filter(t => t.status === 'pagar');
   const totalPendente = pendentes.reduce((s,t) => s + t.valor, 0);
-  const saldo = totalReceitas - totalDespesas;
-  const saldoPrevisto = totalReceitas - totalPendente; // receitas totais - despesas pendentes
+  // RN001: saldo do período = receitas − despesas já pagas;
+  // saldo previsto = receitas − todas as despesas (inclui as que ainda vão ser pagas)
+  const saldo = totalReceitas - (totalDespesas - totalPendente);
+  const saldoPrevisto = totalReceitas - totalDespesas;
 
   document.getElementById('saldoPeriodo').textContent = formatarMoeda(saldo);
   document.getElementById('saldoPrevisto').lastChild.textContent = ' Saldo previsto: ' + formatarMoeda(saldoPrevisto);
