@@ -1,0 +1,55 @@
+name: Testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: API (memória + MySQL 8)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: poupee
+      DB_TESTE: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Criar o banco a partir de db/schema.sql
+        working-directory: .
+        run: mysql -h 127.0.0.1 -uroot -proot < db/schema.sql
+
+      - name: Conferir o seed
+        working-directory: .
+        run: mysql -h 127.0.0.1 -uroot -proot < db/seed.sql
+
+      - run: npm ci
+      - run: npm test
