@@ -1,6 +1,6 @@
 # API do Poupee (back-end)
 
-Lógica do sistema: CRUD de despesas e receitas, categorias, regras de negócio,
+Lógica do sistema: conta e login, CRUD de despesas e receitas, categorias, regras de negócio,
 validação de valores, filtros por mês/ano e cálculo do balanço. Node.js + Express + MySQL.
 
 ## Como rodar
@@ -10,10 +10,11 @@ cd backend
 npm install
 
 # Sem banco (dados de exemplo em memória, somem ao reiniciar)
+# Login de exemplo: thiago@exemplo.com / 123456
 npm run dev:memoria
 
 # Com MySQL: crie o banco com db/schema.sql (e db/seed.sql se quiser dados de exemplo),
-# copie .env.example para .env, ajuste usuário/senha e rode:
+# copie .env.example para .env, ajuste usuário/senha do banco e o JWT_SEGREDO e rode:
 npm start
 ```
 
@@ -26,15 +27,50 @@ npm test                 # regras + API usando o repositório em memória
 DB_TESTE=1 npm test      # também roda contra o MySQL do .env (ESVAZIA as tabelas!)
 ```
 
-## Usuário
+## Conta e login
 
-Enquanto o login não existe, toda requisição manda o cabeçalho `X-Usuario-Id: 1`.
+1. `POST /api/usuarios` com `{ nome, email, senha, confirmacaoSenha }` cria a conta (já com as categorias padrão).
+2. `POST /api/login` com `{ email, senha }` entra.
+
+Os dois devolvem:
+
+```json
+{ "token": "eyJhbGciOi...", "usuario": { "id": 1, "nome": "Thiago Veronez", "email": "thiago@exemplo.com", "tema": "light" } }
+```
+
+Todas as outras rotas exigem o token no cabeçalho:
+
+```
+Authorization: Bearer eyJhbGciOi...
+```
+
+O token vale 7 dias. Sem token, ou com um token vencido, a API responde 401 e o front deve voltar para a tela de login.
 Cada usuário só enxerga e altera os próprios dados.
+
+Exemplo no front:
+
+```js
+const resp = await fetch('http://localhost:3000/api/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, senha }),
+});
+const { token } = await resp.json();
+localStorage.setItem('poupee_token', token);
+
+const balanco = await fetch('http://localhost:3000/api/balanco?mes=8&ano=2026', {
+  headers: { Authorization: `Bearer ${token}` },
+}).then(r => r.json());
+```
 
 ## Endpoints
 
 | Método | Caminho | O que faz |
 | --- | --- | --- |
+| POST | `/api/usuarios` | Cria a conta (aberta, sem token) |
+| POST | `/api/login` | Entra e recebe o token (aberta, sem token) |
+| GET | `/api/eu` | Dados do usuário logado |
+| PUT | `/api/eu` | Altera `{ nome?, tema? }` (`tema`: `light` ou `dark`) |
 | GET | `/api/categorias?tipo=despesa` | Lista categorias (tipo opcional) |
 | GET | `/api/categorias/:id` | Uma categoria |
 | POST | `/api/categorias` | Cria `{ nome, tipo, cor?, icone?, favorita?, ordem? }` |
@@ -75,10 +111,11 @@ Resposta do balanço:
 
 Sempre `{ "erro": "mensagem pronta pra mostrar" }`. Erros de validação (400) trazem também
 `campos`, com a mensagem de cada campo: `{ "erro": "...", "campos": { "valor": "O valor precisa ser maior que zero" } }`.
-404 = não encontrado, 409 = conflito (nome repetido, categoria em uso), 401 = sem `X-Usuario-Id`.
+404 = não encontrado, 409 = conflito (e-mail ou nome de categoria repetido, categoria em uso), 401 = sem login ou senha errada.
 
 ## Regras de negócio
 
+- E-mail único por conta (sem diferenciar maiúsculas); senha com pelo menos 6 caracteres, guardada só como hash bcrypt.
 - Valor maior que zero, no máximo R$ 99.999.999,99 e com até 2 casas decimais.
 - Data no formato `AAAA-MM-DD` e existente no calendário.
 - Descrição obrigatória (até 160 caracteres).
@@ -87,7 +124,7 @@ Sempre `{ "erro": "mensagem pronta pra mostrar" }`. Erros de validação (400) t
 - Nome de categoria único por usuário dentro do mesmo tipo (sem diferenciar maiúsculas).
 - Não dá pra excluir nem trocar o tipo de uma categoria que já tem lançamentos.
 - Balanço pela data de competência (a `data` do lançamento):
-  - `saldoRealizado` = receitas − despesas pagas
+  - `saldoRealizado` = receitas − despesas pagas (o "Saldo do período" da tela)
   - `saldoPrevisto` = receitas − todas as despesas
 - As contas são feitas em centavos (inteiros) pra não ter erro de arredondamento.
 
@@ -99,7 +136,7 @@ src/
   server.js              sobe o servidor (MySQL ou memória)
   erros.js               tipos de erro → status HTTP
   regras/                validação, filtros e cálculo do balanço (sem banco, fáceis de testar)
-  servicos/              regras que precisam consultar dados (categoria do mesmo tipo etc.)
+  servicos/              regras que precisam consultar dados (conta, categoria do mesmo tipo etc.)
   repositorios/mysql/    único lugar com SQL
   repositorios/memoria.js  mesma interface, sem banco
 test/                    testes automatizados (node --test)

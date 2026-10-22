@@ -1,16 +1,12 @@
 // Dados de exemplo iguais ao db/seed.sql, pra rodar em memória.
-const CATEGORIAS = [
-  ['Moradia', '#F2600C', '🏠', 'despesa'],
-  ['Alimentação', '#2F7DBF', '🛒', 'despesa'],
-  ['Transporte', '#8A5CD6', '⛽', 'despesa'],
-  ['Lazer', '#D6497D', '🎬', 'despesa'],
-  ['Saúde', '#3EA37A', '💊', 'despesa'],
-  ['Educação', '#C9A227', '📚', 'despesa'],
-  ['Outros', '#6B6B66', '📦', 'despesa'],
-  ['Renda Fixa', '#1E8A5F', '💼', 'receita'],
-  ['Renda Extra', '#3FA36B', '💻', 'receita'],
-  ['Investimentos', '#2F9E82', '📈', 'receita'],
-];
+// Login: thiago@exemplo.com / 123456
+const { criarCategoriasPadrao } = require('../regras/categoriasPadrao');
+
+const USUARIO = {
+  nome: 'Thiago Veronez',
+  email: 'thiago@exemplo.com',
+  senhaHash: '$2b$10$9H8UegKKMcPtSrydJGXE7egcX9YnpIl2vdxpCAydhHuqDWYwWFat.', // "123456"
+};
 
 const TRANSACOES = [
   ['despesa', 'Aluguel', 95000, '2026-09-05', 'Moradia', 'pagar'],
@@ -24,15 +20,14 @@ const TRANSACOES = [
   ['receita', 'Dividendos', 42000, '2026-08-20', 'Investimentos', 'paga'],
 ];
 
-async function popularExemplo(repos, usuarioId) {
-  const ids = {};
-  for (const [i, [nome, cor, icone, tipo]] of CATEGORIAS.entries()) {
-    const c = await repos.categorias.criar(usuarioId, { nome, cor, icone, tipo, favorita: false, ordem: i + 1 });
-    ids[nome] = c.id;
-  }
+// Cria o usuário de exemplo com categorias e lançamentos; devolve o usuário
+async function popularExemplo(repos) {
+  const usuario = await repos.usuarios.criar(USUARIO);
+  const ids = await criarCategoriasPadrao(repos.categorias, usuario.id);
   for (const [tipo, descricao, valorCentavos, data, categoria, status] of TRANSACOES) {
-    await repos.transacoes.criar(usuarioId, { tipo, descricao, valorCentavos, data, categoriaId: ids[categoria], status });
+    await repos.transacoes.criar(usuario.id, { tipo, descricao, valorCentavos, data, categoriaId: ids[categoria], status });
   }
+  return usuario;
 }
 
-module.exports = { popularExemplo };
+module.exports = { popularExemplo, USUARIO };

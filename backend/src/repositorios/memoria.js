@@ -6,11 +6,34 @@
 const { correspondeFiltros } = require('../regras/periodo');
 
 function criarRepositoriosMemoria() {
+  const usuarios = [];
   const categorias = [];
   const transacoes = [];
+  let proximoIdUsuario = 1;
   let proximoIdCategoria = 1;
   let proximoIdTransacao = 1;
   const copia = obj => (obj ? { ...obj } : null);
+
+  const repoUsuarios = {
+    async criar(dados) {
+      const novo = { tema: 'light', ...dados, id: proximoIdUsuario++, criadoEm: new Date().toISOString() };
+      usuarios.push(novo);
+      return copia(novo);
+    },
+    async buscarPorId(id) {
+      return copia(usuarios.find(u => u.id === id));
+    },
+    async buscarPorEmail(email) {
+      const alvo = email.toLowerCase();
+      return copia(usuarios.find(u => u.email.toLowerCase() === alvo));
+    },
+    async atualizar(id, dados) {
+      const u = usuarios.find(x => x.id === id);
+      if (!u) return null;
+      Object.assign(u, dados);
+      return copia(u);
+    },
+  };
 
   const repoCategorias = {
     async listar(usuarioId, { tipo } = {}) {
@@ -77,7 +100,7 @@ function criarRepositoriosMemoria() {
     },
   };
 
-  return { categorias: repoCategorias, transacoes: repoTransacoes };
+  return { usuarios: repoUsuarios, categorias: repoCategorias, transacoes: repoTransacoes };
 }
 
 module.exports = { criarRepositoriosMemoria };

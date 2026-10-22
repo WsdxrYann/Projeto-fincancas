@@ -13,8 +13,10 @@
     "node": ">=18"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.9",
     "express": "^4.22.3",
+    "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.24.6"
   }
 }

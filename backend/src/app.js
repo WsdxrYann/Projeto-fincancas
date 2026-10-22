@@ -7,17 +7,7 @@ const { ErroApp, ErroValidacao } = require('./erros');
 const { criarServicoCategorias } = require('./servicos/categorias');
 const { criarServicoTransacoes } = require('./servicos/transacoes');
 const { criarServicoBalanco } = require('./servicos/balanco');
-
-// Enquanto o login não existe, o front informa o usuário no cabeçalho
-// X-Usuario-Id. Quando a autenticação entrar, só esta função muda.
-function identificarUsuario(req, res, next) {
-  const id = Number(req.get('X-Usuario-Id'));
-  if (!Number.isInteger(id) || id <= 0) {
-    return res.status(401).json({ erro: 'Usuário não identificado (cabeçalho X-Usuario-Id)' });
-  }
-  req.usuarioId = id;
-  next();
-}
+const { criarServicoUsuarios } = require('./servicos/usuarios');
 
 function idDaRota(req) {
   const id = Number(req.params.id);
@@ -38,7 +28,9 @@ function traduzirErroBanco(err) {
   return null;
 }
 
-function criarApp(repos, { origemPermitida = '*' } = {}) {
+function criarApp(repos, { origemPermitida = '*', segredoJwt }) {
+  if (!segredoJwt) throw new Error('criarApp precisa de segredoJwt');
+  const usuarios = criarServicoUsuarios(repos, { segredoJwt });
   const categorias = criarServicoCategorias(repos);
   const transacoes = criarServicoTransacoes(repos);
   const balanco = criarServicoBalanco(repos);
@@ -49,7 +41,7 @@ function criarApp(repos, { origemPermitida = '*' } = {}) {
   // CORS: o front roda separado (Live Server / GitHub Pages)
   app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', origemPermitida);
-    res.set('Access-Control-Allow-Headers', 'Content-Type, X-Usuario-Id');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     next();
@@ -57,8 +49,32 @@ function criarApp(repos, { origemPermitida = '*' } = {}) {
 
   app.get('/api/saude', (req, res) => res.json({ ok: true }));
 
+  // ---------- Conta (rotas abertas) ----------
+  app.post('/api/usuarios', rota(async (req, res) => {
+    res.status(201).json(await usuarios.cadastrar(req.body));
+  }));
+  app.post('/api/login', rota(async (req, res) => {
+    res.json(await usuarios.entrar(req.body));
+  }));
+
+  // Daqui pra baixo tudo exige "Authorization: Bearer <token>"
   const api = express.Router();
-  api.use(identificarUsuario);
+  api.use((req, res, next) => {
+    const [esquema, token] = (req.get('Authorization') || '').split(' ');
+    const conferir = esquema === 'Bearer' && token ? usuarios.usuarioDoToken(token) : Promise.resolve(null);
+    conferir.then(id => {
+      if (!id) throw new ErroApp('Sessão expirada ou inválida. Entre novamente.', 401);
+      req.usuarioId = id;
+      next();
+    }).catch(next);
+  });
+
+  api.get('/eu', rota(async (req, res) => {
+    res.json(await usuarios.obter(req.usuarioId));
+  }));
+  api.put('/eu', rota(async (req, res) => {
+    res.json(await usuarios.atualizar(req.usuarioId, req.body));
+  }));
 
   // ---------- Categorias ----------
   api.get('/categorias', rota(async (req, res) => {
