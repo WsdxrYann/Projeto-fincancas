@@ -9,13 +9,14 @@ const { criarRepositoriosMemoria } = require('../src/repositorios/memoria');
 const { popularExemplo } = require('../src/repositorios/exemplo');
 
 async function subir(repos) {
-  const servidor = criarApp(repos).listen(0);
+  const servidor = criarApp(repos, { segredoJwt: 'segredo-de-teste' }).listen(0);
   await new Promise(r => servidor.once('listening', r));
   const base = `http://127.0.0.1:${servidor.address().port}/api`;
-  const chamar = async (metodo, caminho, corpo, usuario = 1) => {
+  // `token` = quem está chamando; por padrão o usuário de exemplo (definido no before)
+  const chamar = async (metodo, caminho, corpo, token = chamar.token) => {
     const resp = await fetch(base + caminho, {
       method: metodo,
-      headers: { 'Content-Type': 'application/json', 'X-Usuario-Id': String(usuario) },
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: corpo === undefined ? undefined : JSON.stringify(corpo),
     });
     const texto = await resp.text();
@@ -26,14 +27,18 @@ async function subir(repos) {
 
 function bateria(nome, prepararRepos) {
   test.describe(nome, () => {
-    let servidor, base, chamar, finalizar;
+    let servidor, base, chamar, finalizar, tokenOutro;
     const idCategoria = {};
 
     test.before(async () => {
       const preparo = await prepararRepos();
       finalizar = preparo.finalizar;
-      await popularExemplo(preparo.repos, 1);
+      await popularExemplo(preparo.repos);
       ({ servidor, base, chamar } = await subir(preparo.repos));
+      const login = await chamar('POST', '/login', { email: 'thiago@exemplo.com', senha: '123456' });
+      chamar.token = login.corpo.token;
+      const outro = await chamar('POST', '/usuarios', { nome: 'Outra Pessoa', email: 'outra@teste.com', senha: 'segura123', confirmacaoSenha: 'segura123' });
+      tokenOutro = outro.corpo.token;
       const { corpo } = await chamar('GET', '/categorias');
       for (const c of corpo) idCategoria[c.nome] = c.id;
     });
@@ -42,9 +47,41 @@ function bateria(nome, prepararRepos) {
       if (finalizar) await finalizar();
     });
 
-    test('exige identificação do usuário', async () => {
-      const r = await chamar('GET', '/transacoes', undefined, 'abc');
-      assert.equal(r.status, 401);
+    test('exige login: sem token ou com token inválido dá 401', async () => {
+      assert.equal((await chamar('GET', '/transacoes', undefined, null)).status, 401);
+      assert.equal((await chamar('GET', '/transacoes', undefined, 'abc')).status, 401);
+    });
+
+    test('login com senha errada não revela se o e-mail existe', async () => {
+      const errada = await chamar('POST', '/login', { email: 'thiago@exemplo.com', senha: 'xxxxxx' }, null);
+      const inexistente = await chamar('POST', '/login', { email: 'ninguem@teste.com', senha: '123456' }, null);
+      assert.equal(errada.status, 401);
+      assert.equal(inexistente.status, 401);
+      assert.equal(errada.corpo.erro, inexistente.corpo.erro);
+    });
+
+    test('criar conta: valida dados, e-mail único e já vem com categorias padrão', async () => {
+      const invalida = await chamar('POST', '/usuarios', { nome: '', email: 'x', senha: '123', confirmacaoSenha: '1234' }, null);
+      assert.equal(invalida.status, 400);
+      assert.deepEqual(Object.keys(invalida.corpo.campos).sort(), ['email', 'nome', 'senha']);
+
+      const senhas = await chamar('POST', '/usuarios', { nome: 'A', email: 'a@teste.com', senha: '123456', confirmacaoSenha: '654321' }, null);
+      assert.equal(senhas.corpo.campos.confirmacaoSenha, 'As senhas não conferem');
+
+      const repetido = await chamar('POST', '/usuarios', { nome: 'Outro', email: 'THIAGO@exemplo.com', senha: '123456' }, null);
+      assert.equal(repetido.status, 409);
+
+      const cats = await chamar('GET', '/categorias', undefined, tokenOutro);
+      assert.equal(cats.corpo.length, 10);
+      const eu = await chamar('GET', '/eu', undefined, tokenOutro);
+      assert.equal(eu.corpo.email, 'outra@teste.com');
+      assert.equal(eu.corpo.senhaHash, undefined);
+    });
+
+    test('guarda a preferência de tema', async () => {
+      const r = await chamar('PUT', '/eu', { tema: 'dark' }, tokenOutro);
+      assert.equal(r.corpo.tema, 'dark');
+      assert.equal((await chamar('PUT', '/eu', { tema: 'azul' }, tokenOutro)).status, 400);
     });
 
     test('lista categorias por tipo', async () => {
@@ -120,12 +157,12 @@ function bateria(nome, prepararRepos) {
     });
 
     test('um usuário não enxerga nem altera dados de outro', async () => {
-      const lista = await chamar('GET', '/transacoes', undefined, 2);
+      const lista = await chamar('GET', '/transacoes', undefined, tokenOutro);
       assert.deepEqual(lista.corpo, []);
-      const alheia = await chamar('POST', '/transacoes', { tipo: 'despesa', descricao: 'X', valor: 5, data: '2026-10-10', categoriaId: idCategoria.Moradia }, 2);
+      const alheia = await chamar('POST', '/transacoes', { tipo: 'despesa', descricao: 'X', valor: 5, data: '2026-10-10', categoriaId: idCategoria.Moradia }, tokenOutro);
       assert.equal(alheia.status, 400);
       const primeira = (await chamar('GET', '/transacoes')).corpo[0];
-      assert.equal((await chamar('DELETE', `/transacoes/${primeira.id}`, undefined, 2)).status, 404);
+      assert.equal((await chamar('DELETE', `/transacoes/${primeira.id}`, undefined, tokenOutro)).status, 404);
     });
 
     test('categorias: nome único por tipo, não exclui nem muda tipo se estiver em uso', async () => {
@@ -149,7 +186,7 @@ function bateria(nome, prepararRepos) {
 
     test('JSON malformado e id inválido viram 400', async () => {
       const r = await fetch(`${base}/transacoes`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Usuario-Id': '1' }, body: '{nope',
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${chamar.token}` }, body: '{nope',
       });
       assert.equal(r.status, 400);
       assert.equal((await chamar('GET', '/transacoes/abc')).status, 400);
@@ -167,7 +204,6 @@ if (process.env.DB_TESTE === '1') {
     await pool.query('DELETE FROM transacoes');
     await pool.query('DELETE FROM categorias');
     await pool.query('DELETE FROM usuarios');
-    await pool.query("INSERT INTO usuarios (id, nome, email, senha_hash) VALUES (1, 'Teste 1', 't1@teste.com', 'x'), (2, 'Teste 2', 't2@teste.com', 'x')");
     return { repos: criarRepositoriosMysql(pool), finalizar: () => pool.end() };
   });
 }

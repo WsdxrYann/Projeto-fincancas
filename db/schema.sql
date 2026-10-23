@@ -12,6 +12,7 @@
 --   - toda transação precisa estar vinculada a uma categoria
 --   - a categoria usada numa transação precisa ser do mesmo tipo (despesa/receita)
 --   - balanço calculado por data de competência (coluna `data`)
+--   - saldo realizado = receitas − despesas pagas; saldo previsto = receitas − todas as despesas
 -- =====================================================================
 
 CREATE DATABASE IF NOT EXISTS poupee
@@ -19,6 +20,7 @@ CREATE DATABASE IF NOT EXISTS poupee
   COLLATE utf8mb4_unicode_ci;
 
 USE poupee;
+SET NAMES utf8mb4; -- garante acentos certos nas mensagens dos triggers
 
 -- ---------------------------------------------------------------------
 -- USUÁRIOS
@@ -123,6 +125,8 @@ SELECT
   SUM(CASE WHEN tipo = 'receita' THEN valor ELSE 0 END) AS total_receitas,
   SUM(CASE WHEN tipo = 'despesa' THEN valor ELSE 0 END) AS total_despesas,
   SUM(CASE WHEN tipo = 'despesa' AND status = 'pagar' THEN valor ELSE 0 END) AS total_pendente,
-  SUM(CASE WHEN tipo = 'receita' THEN valor ELSE -valor END) AS saldo
+  -- RN001: saldo do período só desconta o que já foi pago; o previsto desconta tudo
+  SUM(CASE WHEN tipo = 'receita' THEN valor WHEN status = 'paga' THEN -valor ELSE 0 END) AS saldo_realizado,
+  SUM(CASE WHEN tipo = 'receita' THEN valor ELSE -valor END) AS saldo_previsto
 FROM transacoes
 GROUP BY usuario_id, YEAR(data), MONTH(data);

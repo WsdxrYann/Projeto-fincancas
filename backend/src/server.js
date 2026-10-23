@@ -11,8 +11,8 @@ async function iniciar() {
     const { criarRepositoriosMemoria } = require('./repositorios/memoria');
     const { popularExemplo } = require('./repositorios/exemplo');
     repos = criarRepositoriosMemoria();
-    await popularExemplo(repos, 1);
-    console.log('Usando dados em memória (usuário 1 com dados de exemplo)');
+    await popularExemplo(repos);
+    console.log('Usando dados em memória. Login de exemplo: thiago@exemplo.com / 123456');
   } else {
     const { criarPool } = require('./repositorios/mysql/conexao');
     const { criarRepositoriosMysql } = require('./repositorios/mysql');
@@ -22,7 +22,13 @@ async function iniciar() {
     console.log(`Conectado ao MySQL em ${process.env.DB_HOST || 'localhost'}`);
   }
 
-  criarApp(repos, { origemPermitida: process.env.CORS_ORIGEM || '*' })
+  let segredoJwt = process.env.JWT_SEGREDO;
+  if (!segredoJwt) {
+    segredoJwt = require('crypto').randomBytes(32).toString('hex');
+    console.warn('JWT_SEGREDO não definido no .env: usando um segredo temporário (todo mundo precisa entrar de novo quando o servidor reiniciar)');
+  }
+
+  criarApp(repos, { origemPermitida: process.env.CORS_ORIGEM || '*', segredoJwt })
     .listen(porta, () => console.log(`API do Poupee em http://localhost:${porta}/api`));
 }
 

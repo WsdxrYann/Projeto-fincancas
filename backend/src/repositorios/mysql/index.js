@@ -5,6 +5,15 @@
 // =====================================================================
 const { valorParaCentavos } = require('../../regras/validacao');
 
+const linhaParaUsuario = r => ({
+  id: r.id,
+  nome: r.nome,
+  email: r.email,
+  senhaHash: r.senha_hash,
+  tema: r.tema,
+  criadoEm: r.criado_em,
+});
+
 const linhaParaCategoria = r => ({
   id: r.id,
   usuarioId: r.usuario_id,
@@ -52,6 +61,35 @@ function whereFiltros(usuarioId, filtros) {
 }
 
 function criarRepositoriosMysql(pool) {
+  const usuarios = {
+    async criar(d) {
+      const [r] = await pool.execute(
+        'INSERT INTO usuarios (nome, email, senha_hash) VALUES (?, ?, ?)',
+        [d.nome, d.email, d.senhaHash],
+      );
+      return usuarios.buscarPorId(r.insertId);
+    },
+    async buscarPorId(id) {
+      const [linhas] = await pool.execute('SELECT * FROM usuarios WHERE id = ?', [id]);
+      return linhas.length ? linhaParaUsuario(linhas[0]) : null;
+    },
+    async buscarPorEmail(email) {
+      const [linhas] = await pool.execute('SELECT * FROM usuarios WHERE email = ?', [email]);
+      return linhas.length ? linhaParaUsuario(linhas[0]) : null;
+    },
+    async atualizar(id, d) {
+      const colunas = { nome: 'nome', tema: 'tema', senhaHash: 'senha_hash' };
+      const campos = Object.keys(d).filter(k => colunas[k]);
+      if (campos.length) {
+        await pool.execute(
+          `UPDATE usuarios SET ${campos.map(k => `${colunas[k]} = ?`).join(', ')} WHERE id = ?`,
+          [...campos.map(k => d[k]), id],
+        );
+      }
+      return usuarios.buscarPorId(id);
+    },
+  };
+
   const categorias = {
     async listar(usuarioId, { tipo } = {}) {
       const [linhas] = tipo
@@ -131,7 +169,7 @@ function criarRepositoriosMysql(pool) {
     },
   };
 
-  return { categorias, transacoes };
+  return { usuarios, categorias, transacoes };
 }
 
 module.exports = { criarRepositoriosMysql, whereFiltros };

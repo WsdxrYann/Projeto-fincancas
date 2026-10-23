@@ -1,79 +1,174 @@
-# Projeto-fincancas
- 
-# Guia Rápido de GitHub
+<h1 align="center">Poupee: organizador de finanças</h1>
 
-Guia simples para todo mundo do time saber usar o Git/GitHub no dia a dia.
+<p align="center">
+  Controle despesas e receitas em um só lugar e saiba exatamente para onde seu dinheiro está indo.
+</p>
 
-## 1. Baixar o projeto na sua máquina
+<p align="center">
+  <a href="https://wsdxryann.github.io/Projeto-fincancas/"><strong>Abrir o protótipo navegável</strong></a>
+  ·
+  <a href="docs/requisitos.md">Requisitos</a>
+  ·
+  <a href="backend/README.md">API</a>
+  ·
+  <a href="docs/decisoes.md">Decisões</a>
+</p>
 
-Isso só precisa ser feito uma vez:
+![Visão geral do Poupee](docs/img/telas/visao-geral.png)
 
-```bash
-git clone https://github.com/WsdxrYann/Projeto-fincancas.git
-cd Projeto-fincancas
+## Sobre o projeto
+
+Boa parte das pessoas não sabe, no fim do mês, para onde foi parte da renda: os gastos se acumulam,
+contas vencem sem ninguém perceber e a planilha acaba abandonada por falta de praticidade.
+
+O **Poupee** é um organizador de finanças pessoais para a web. O usuário cria a conta, registra
+despesas e receitas em categorias, acompanha o que ainda está a pagar e vê, em um único painel,
+o saldo do período e a distribuição dos gastos por categoria.
+
+Projeto Integrador do curso de **Tecnologia em Desenvolvimento de Software Multiplataforma** da
+**Fatec Franca "Dr. Thomaz Novelino"** (Centro Paula Souza), 2026.
+<!-- Completar: disciplina, professor(a) orientador(a) e semestre -->
+
+## Equipe
+
+- Douglas Andrade Cintra de Brito
+- Eleonora Cintra Castro
+- João Pedro Racero Santos
+- Ryan Filipe Damasceno
+- Thiago Veronez da Silva Santos
+
+| Frente | Responsabilidades |
+| --- | --- |
+| Layout e Visão Geral | Protótipo, padrão visual, componentes e tela de Visão Geral / Balanço |
+| Tela de Despesas | Cadastro, formulários, filtros, listagem e responsividade |
+| Lógica do sistema | CRUD, categorias, regras de negócio, validações, filtros, balanço e integração com o banco |
+| Banco de dados | Modelos conceitual e lógico, tabelas, relacionamentos e persistência |
+| Organização e documentação | GitHub, tarefas, requisitos, casos de uso, diagramas e revisão |
+
+## Funcionalidades
+
+- [x] Criar conta e entrar com e-mail e senha (senha guardada com hash)
+- [x] Cadastrar, editar e excluir despesas e receitas
+- [x] Categorias próprias com nome, cor e ícone, favoritas e ordem
+- [x] Marcar despesa como paga ou a pagar com um clique
+- [x] Filtros por mês, ano, status e descrição
+- [x] Balanço do período: saldo, saldo previsto, contas pendentes e gastos por categoria
+- [x] Exportar lançamentos em CSV e PDF (protótipo)
+- [x] Tema claro e escuro
+- [ ] Ligar as telas do protótipo à API (hoje o front ainda usa dados de exemplo)
+- [ ] Recuperar senha por e-mail
+- [ ] Conta bancária ([em discussão](docs/decisoes.md#5-conta-bancária-em-aberto))
+
+Lista completa em [docs/requisitos.md](docs/requisitos.md).
+
+## Tecnologias
+
+| Camada | Tecnologia |
+| --- | --- |
+| Front-end | HTML, CSS e JavaScript, Chart.js, jsPDF, Driver.js (publicado no GitHub Pages) |
+| Back-end | Node.js, Express, bcryptjs, JSON Web Token |
+| Banco de dados | MySQL 8 (também funciona em MariaDB) |
+| Testes | `node:test` (sem dependências extras) |
+
+## Estrutura do repositório
+
+```
+.
+├── index.html, script.js, styles.css   protótipo navegável (front-end)
+├── backend/                            API REST (lógica do sistema)
+│   ├── src/regras/                     validações, filtros e cálculo do balanço
+│   ├── src/servicos/                   regras que consultam dados (conta, categorias, lançamentos)
+│   ├── src/repositorios/               acesso ao MySQL (e versão em memória para testes)
+│   └── test/                           testes automatizados
+├── db/
+│   ├── schema.sql                      tabelas, triggers e view do balanço
+│   └── seed.sql                        dados de exemplo
+├── docs/
+│   ├── requisitos.md                   requisitos, regras de negócio e casos de uso
+│   ├── decisoes.md                     registro de decisões do projeto
+│   └── img/                            diagramas e telas
+└── CONTRIBUTING.md                     guia de Git do time
 ```
 
-## 2. Criar sua branch
+## Como rodar
 
-Antes de começar a mexer em qualquer coisa, crie uma branch com o nome da tarefa que você vai fazer:
+### Protótipo (só o front-end)
 
-```bash
-git checkout -b feature/nome-da-tarefa
-```
+Abra o `index.html` no navegador, ou use a extensão Live Server do VS Code.
+Também está publicado em <https://wsdxryann.github.io/Projeto-fincancas/>.
 
-Exemplo:
-```bash
-git checkout -b feature/tela-login
-```
+### Banco de dados
 
-Nunca trabalhe direto na `main`.
-
-## 3. Salvar suas alterações (commit)
-
-Depois de mexer nos arquivos:
+Com o MySQL instalado:
 
 ```bash
-git add .
-git commit -m "explica o que você fez"
+mysql -u root -p < db/schema.sql
+mysql -u root -p < db/seed.sql     # opcional: dados de exemplo
 ```
 
-## 4. Enviar sua branch para o GitHub
+### API
+
+Precisa do Node.js 18 ou mais novo.
 
 ```bash
-git push origin feature/nome-da-tarefa
+cd backend
+npm install
+cp .env.example .env               # ajuste usuário e senha do MySQL e o JWT_SEGREDO
+npm start                          # API em http://localhost:3000/api
 ```
 
-## 5. Abrir um Pull Request (pedir para juntar seu código)
+Sem MySQL instalado, dá para testar com dados em memória: `npm run dev:memoria`.
 
-1. Entre no repositório pelo site do GitHub.
-2. Vai aparecer um botão **"Compare & pull request"** — clique nele.
-3. Escreva um título e uma breve descrição do que você fez.
-4. Clique em **"Create pull request"**.
-5. Espera alguém do time revisar e aprovar antes do merge.
+Login de exemplo (seed e modo memória): **thiago@exemplo.com** / **123456**.
 
-## 6. Atualizar seu código com o que o time já fez (pull)
+Os endpoints, o formato das respostas e as regras estão em [backend/README.md](backend/README.md).
 
-Faça isso sempre no início do dia, ou antes de criar uma nova branch:
+### Testes
 
 ```bash
-git checkout main
-git pull origin main
+cd backend
+npm test
 ```
 
-Se você já estiver numa branch e quiser trazer as atualizações da `main` pra ela:
+## Modelagem
 
-```bash
-git pull origin main
-```
+| Processo (BPMN) | Casos de uso |
+| --- | --- |
+| ![BPMN](docs/img/bpmn.png) | ![Casos de uso](docs/img/casos-de-uso.jpg) |
 
-## Resumo do fluxo
+**Modelo entidade-relacionamento:** um usuário tem várias categorias e vários lançamentos; cada
+lançamento pertence a uma categoria do mesmo tipo (despesa ou receita).
 
-1. `git pull origin main` → atualiza seu código
-2. `git checkout -b feature/nome-da-tarefa` → cria sua branch
-3. Trabalha, `git add .`, `git commit -m "..."`
-4. `git push origin feature/nome-da-tarefa` → envia pro GitHub
-5. Abre o Pull Request no site
-6. Espera aprovação e merge
+![Diagrama entidade-relacionamento](docs/img/der.png)
 
----
+### Principais regras de negócio
 
+- **Saldo do período** = receitas − despesas pagas; **saldo previsto** = receitas − todas as despesas.
+- Valores sempre maiores que zero.
+- Todo lançamento tem uma categoria, e ela precisa ser do mesmo tipo do lançamento.
+- Só despesas têm status (a pagar / paga); receitas contam como recebidas.
+- Um e-mail por conta; categoria com lançamentos não pode ser excluída.
+
+## Telas
+
+| | |
+| --- | --- |
+| ![Página inicial](docs/img/telas/landing.png) | ![Login](docs/img/telas/login.png) |
+| ![Despesas](docs/img/telas/despesas.png) | ![Receitas](docs/img/telas/receitas.png) |
+| ![Categorias](docs/img/telas/categorias.png) | ![Novo lançamento](docs/img/telas/novo-lancamento.png) |
+
+## Próximos passos
+
+- Ligar as telas à API (login, lançamentos, categorias e balanço)
+- Lembretes de contas a vencer
+- Lançamentos recorrentes
+- Metas de gastos por categoria
+
+## Como contribuir
+
+Veja o [guia de Git do time](CONTRIBUTING.md). Toda mudança entra por Pull Request, e os testes
+rodam automaticamente no GitHub.
+
+## Licença
+
+[MIT](LICENSE)
